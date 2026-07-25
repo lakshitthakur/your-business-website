@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import heroCar from "@/assets/hero-car.jpg";
 import suv from "@/assets/suv.jpg";
 import van from "@/assets/van.jpg";
 import truck from "@/assets/truck.jpg";
-import { Phone, Mail, Globe, MapPin, Check, Car, Truck, Package } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, Check, Car, Truck, Package, Search } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,7 +47,7 @@ function Index() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Logo />
           <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
-            <a href="#fleet" className="hover:text-primary">Fleet</a>
+            <Link to="/fleet" className="hover:text-primary">Browse Fleet</Link>
             <a href="#plans" className="hover:text-primary">Plans</a>
             <a href="#locations" className="hover:text-primary">Locations</a>
             <a href="#contact" className="hover:text-primary">Contact</a>
@@ -59,6 +60,7 @@ function Index() {
           </a>
         </div>
       </header>
+
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border">
@@ -76,19 +78,20 @@ function Index() {
               Melbourne. Flexible terms, honest pricing, family run.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                to="/fleet"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"
+              >
+                <Search className="h-4 w-4" /> Browse fleet
+              </Link>
               <a
                 href="tel:0404115670"
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-semibold hover:bg-secondary"
               >
                 <Phone className="h-4 w-4" /> Call Gary
               </a>
-              <a
-                href="#fleet"
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-semibold hover:bg-secondary"
-              >
-                View fleet
-              </a>
             </div>
+
             <div className="mt-8 flex flex-wrap gap-6 text-sm text-muted-foreground">
               <span className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> No hidden fees</span>
               <span className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Flexible terms</span>
