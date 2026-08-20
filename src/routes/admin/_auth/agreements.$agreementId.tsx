@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getAgreement, updateAgreement, addPayment, addCharge, addNote, recordReturn, approveAgreement, activateAgreement } from "@/lib/server/agreements";
-import { downloadAgreementPdf, downloadReceiptPdf } from "@/lib/server/pdfs";
+import { getAgreement, updateAgreement, addPayment, addCharge, addNote, recordReturn, approveAgreement, activateAgreement } from "@/lib/agreements";
+import { downloadAgreementPdf, downloadReceiptPdf } from "@/lib/pdfs";
 import { toast } from "sonner";
 import { ArrowLeft, Download, Plus, FileText, CreditCard, Car, User, Check } from "lucide-react";
 

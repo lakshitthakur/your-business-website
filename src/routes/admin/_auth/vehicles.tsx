@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { listVehicles, createVehicle, updateVehicle, deleteVehicle } from "@/lib/server/vehicles";
+import { listVehicles, createVehicle, updateVehicle, deleteVehicle } from "@/lib/vehicles";
 import { toast } from "sonner";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 

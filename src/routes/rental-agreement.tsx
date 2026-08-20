@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { createCustomer } from "@/lib/server/customers";
-import { createAgreement, saveSignature, getSettings } from "@/lib/server/agreements";
-import { downloadAgreementPdf } from "@/lib/server/pdfs";
+import { createCustomer } from "@/lib/customers";
+import { createAgreement, saveSignature, getSettings } from "@/lib/agreements";
+import { downloadAgreementPdf } from "@/lib/pdfs";
 import { SignaturePad } from "@/components/SignaturePad";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Check, FileText, Download } from "lucide-react";

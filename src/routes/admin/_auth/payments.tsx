@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { listAgreements, addPayment, markOverduePayments } from "@/lib/server/agreements";
+import { listAgreements, addPayment, markOverduePayments } from "@/lib/agreements";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/_auth/payments")({

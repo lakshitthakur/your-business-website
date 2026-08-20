@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { listVehicles } from "@/lib/server/vehicles";
+import { listVehicles } from "@/lib/vehicles";
 import { Car, Truck, Package, Phone, Search } from "lucide-react";
 
 type Vehicle = "all" | "car" | "suv" | "van" | "truck";

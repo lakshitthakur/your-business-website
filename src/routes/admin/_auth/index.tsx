@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getDashboardStats } from "@/lib/server/agreements";
+import { getDashboardStats } from "@/lib/agreements";
 import { DollarSign, FileText, Car, CreditCard, AlertTriangle, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/admin/_auth/")({

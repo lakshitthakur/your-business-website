@@ -9,101 +9,237 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as FleetRouteImport } from './routes/fleet'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as FleetRouteImport } from './routes/fleet'
+import { Route as RentalAgreementRouteImport } from './routes/rental-agreement'
+import { Route as AdminAuthRouteRouteImport } from './routes/admin/_auth/route'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminAuthIndexRouteImport } from './routes/admin/_auth/index'
+import { Route as AdminAuthActiveRouteImport } from './routes/admin/_auth/active'
+import { Route as AdminAuthAgreementsRouteImport } from './routes/admin/_auth/agreements'
+import { Route as AdminAuthAuditRouteImport } from './routes/admin/_auth/audit'
+import { Route as AdminAuthCustomersRouteImport } from './routes/admin/_auth/customers'
+import { Route as AdminAuthOverdueRouteImport } from './routes/admin/_auth/overdue'
+import { Route as AdminAuthPaymentsRouteImport } from './routes/admin/_auth/payments'
+import { Route as AdminAuthReportsRouteImport } from './routes/admin/_auth/reports'
+import { Route as AdminAuthReturnsRouteImport } from './routes/admin/_auth/returns'
+import { Route as AdminAuthSettingsRouteImport } from './routes/admin/_auth/settings'
+import { Route as AdminAuthVehiclesRouteImport } from './routes/admin/_auth/vehicles'
+import { Route as AdminAuthAgreementsAgreementIdRouteImport } from './routes/admin/_auth/agreements.$agreementId'
 
-const FleetRoute = FleetRouteImport.update({
-  id: '/fleet',
-  path: '/fleet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const FleetRoute = FleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
+  getParentRoute: () => rootRouteImport,
 } as any)
+const RentalAgreementRoute = RentalAgreementRouteImport.update({
+  id: '/rental-agreement',
+  path: '/rental-agreement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAuthRouteRoute = AdminAuthRouteRouteImport.update({
+  id: '/admin/_auth',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAuthIndexRoute = AdminAuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthActiveRoute = AdminAuthActiveRouteImport.update({
+  id: '/active',
+  path: '/active',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthAgreementsRoute = AdminAuthAgreementsRouteImport.update({
+  id: '/agreements',
+  path: '/agreements',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthAuditRoute = AdminAuthAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthCustomersRoute = AdminAuthCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthOverdueRoute = AdminAuthOverdueRouteImport.update({
+  id: '/overdue',
+  path: '/overdue',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthPaymentsRoute = AdminAuthPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthReportsRoute = AdminAuthReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthReturnsRoute = AdminAuthReturnsRouteImport.update({
+  id: '/returns',
+  path: '/returns',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthSettingsRoute = AdminAuthSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthVehiclesRoute = AdminAuthVehiclesRouteImport.update({
+  id: '/vehicles',
+  path: '/vehicles',
+  getParentRoute: () => AdminAuthRouteRoute,
+} as any)
+const AdminAuthAgreementsAgreementIdRoute =
+  AdminAuthAgreementsAgreementIdRouteImport.update({
+    id: '/$agreementId',
+    path: '/$agreementId',
+    getParentRoute: () => AdminAuthAgreementsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/fleet': typeof FleetRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/rental-agreement': typeof RentalAgreementRoute
+  '/admin': typeof AdminAuthRouteRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/active': typeof AdminAuthActiveRoute
+  '/admin/agreements': typeof AdminAuthAgreementsRouteWithChildren
+  '/admin/audit': typeof AdminAuthAuditRoute
+  '/admin/customers': typeof AdminAuthCustomersRoute
+  '/admin/overdue': typeof AdminAuthOverdueRoute
+  '/admin/payments': typeof AdminAuthPaymentsRoute
+  '/admin/reports': typeof AdminAuthReportsRoute
+  '/admin/returns': typeof AdminAuthReturnsRoute
+  '/admin/settings': typeof AdminAuthSettingsRoute
+  '/admin/vehicles': typeof AdminAuthVehiclesRoute
+  '/admin/': typeof AdminAuthIndexRoute
+  '/admin/agreements/$agreementId': typeof AdminAuthAgreementsAgreementIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/fleet': typeof FleetRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/rental-agreement': typeof RentalAgreementRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/active': typeof AdminAuthActiveRoute
+  '/admin/agreements': typeof AdminAuthAgreementsRouteWithChildren
+  '/admin/audit': typeof AdminAuthAuditRoute
+  '/admin/customers': typeof AdminAuthCustomersRoute
+  '/admin/overdue': typeof AdminAuthOverdueRoute
+  '/admin/payments': typeof AdminAuthPaymentsRoute
+  '/admin/reports': typeof AdminAuthReportsRoute
+  '/admin/returns': typeof AdminAuthReturnsRoute
+  '/admin/settings': typeof AdminAuthSettingsRoute
+  '/admin/vehicles': typeof AdminAuthVehiclesRoute
+  '/admin': typeof AdminAuthIndexRoute
+  '/admin/agreements/$agreementId': typeof AdminAuthAgreementsAgreementIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
   '/fleet': typeof FleetRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/rental-agreement': typeof RentalAgreementRoute
+  '/admin/_auth': typeof AdminAuthRouteRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/_auth/active': typeof AdminAuthActiveRoute
+  '/admin/_auth/agreements': typeof AdminAuthAgreementsRouteWithChildren
+  '/admin/_auth/audit': typeof AdminAuthAuditRoute
+  '/admin/_auth/customers': typeof AdminAuthCustomersRoute
+  '/admin/_auth/overdue': typeof AdminAuthOverdueRoute
+  '/admin/_auth/payments': typeof AdminAuthPaymentsRoute
+  '/admin/_auth/reports': typeof AdminAuthReportsRoute
+  '/admin/_auth/returns': typeof AdminAuthReturnsRoute
+  '/admin/_auth/settings': typeof AdminAuthSettingsRoute
+  '/admin/_auth/vehicles': typeof AdminAuthVehiclesRoute
+  '/admin/_auth/': typeof AdminAuthIndexRoute
+  '/admin/_auth/agreements/$agreementId': typeof AdminAuthAgreementsAgreementIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/fleet' | '/admin'
+  fullPaths:
+    | '/'
+    | '/fleet'
+    | '/rental-agreement'
+    | '/admin'
+    | '/admin/login'
+    | '/admin/active'
+    | '/admin/agreements'
+    | '/admin/audit'
+    | '/admin/customers'
+    | '/admin/overdue'
+    | '/admin/payments'
+    | '/admin/reports'
+    | '/admin/returns'
+    | '/admin/settings'
+    | '/admin/vehicles'
+    | '/admin/'
+    | '/admin/agreements/$agreementId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/fleet' | '/admin'
+  to:
+    | '/'
+    | '/fleet'
+    | '/rental-agreement'
+    | '/admin/login'
+    | '/admin/active'
+    | '/admin/agreements'
+    | '/admin/audit'
+    | '/admin/customers'
+    | '/admin/overdue'
+    | '/admin/payments'
+    | '/admin/reports'
+    | '/admin/returns'
+    | '/admin/settings'
+    | '/admin/vehicles'
+    | '/admin'
+    | '/admin/agreements/$agreementId'
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
-    | '/auth'
     | '/fleet'
-    | '/_authenticated/admin'
+    | '/rental-agreement'
+    | '/admin/_auth'
+    | '/admin/login'
+    | '/admin/_auth/active'
+    | '/admin/_auth/agreements'
+    | '/admin/_auth/audit'
+    | '/admin/_auth/customers'
+    | '/admin/_auth/overdue'
+    | '/admin/_auth/payments'
+    | '/admin/_auth/reports'
+    | '/admin/_auth/returns'
+    | '/admin/_auth/settings'
+    | '/admin/_auth/vehicles'
+    | '/admin/_auth/'
+    | '/admin/_auth/agreements/$agreementId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
   FleetRoute: typeof FleetRoute
+  RentalAgreementRoute: typeof RentalAgreementRoute
+  AdminAuthRouteRoute: typeof AdminAuthRouteRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/fleet': {
-      id: '/fleet'
-      path: '/fleet'
-      fullPath: '/fleet'
-      preLoaderRoute: typeof FleetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -111,33 +247,181 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
+    '/fleet': {
+      id: '/fleet'
+      path: '/fleet'
+      fullPath: '/fleet'
+      preLoaderRoute: typeof FleetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rental-agreement': {
+      id: '/rental-agreement'
+      path: '/rental-agreement'
+      fullPath: '/rental-agreement'
+      preLoaderRoute: typeof RentalAgreementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_auth': {
+      id: '/admin/_auth'
       path: '/admin'
       fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AdminAuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_auth/': {
+      id: '/admin/_auth/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAuthIndexRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/active': {
+      id: '/admin/_auth/active'
+      path: '/active'
+      fullPath: '/admin/active'
+      preLoaderRoute: typeof AdminAuthActiveRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/agreements': {
+      id: '/admin/_auth/agreements'
+      path: '/agreements'
+      fullPath: '/admin/agreements'
+      preLoaderRoute: typeof AdminAuthAgreementsRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/audit': {
+      id: '/admin/_auth/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuthAuditRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/customers': {
+      id: '/admin/_auth/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminAuthCustomersRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/overdue': {
+      id: '/admin/_auth/overdue'
+      path: '/overdue'
+      fullPath: '/admin/overdue'
+      preLoaderRoute: typeof AdminAuthOverdueRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/payments': {
+      id: '/admin/_auth/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminAuthPaymentsRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/reports': {
+      id: '/admin/_auth/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminAuthReportsRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/returns': {
+      id: '/admin/_auth/returns'
+      path: '/returns'
+      fullPath: '/admin/returns'
+      preLoaderRoute: typeof AdminAuthReturnsRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/settings': {
+      id: '/admin/_auth/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminAuthSettingsRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/vehicles': {
+      id: '/admin/_auth/vehicles'
+      path: '/vehicles'
+      fullPath: '/admin/vehicles'
+      preLoaderRoute: typeof AdminAuthVehiclesRouteImport
+      parentRoute: typeof AdminAuthRouteRoute
+    }
+    '/admin/_auth/agreements/$agreementId': {
+      id: '/admin/_auth/agreements/$agreementId'
+      path: '/$agreementId'
+      fullPath: '/admin/agreements/$agreementId'
+      preLoaderRoute: typeof AdminAuthAgreementsAgreementIdRouteImport
+      parentRoute: typeof AdminAuthAgreementsRoute
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+interface AdminAuthAgreementsRouteChildren {
+  AdminAuthAgreementsAgreementIdRoute: typeof AdminAuthAgreementsAgreementIdRoute
 }
 
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+const AdminAuthAgreementsRouteChildren: AdminAuthAgreementsRouteChildren = {
+  AdminAuthAgreementsAgreementIdRoute: AdminAuthAgreementsAgreementIdRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+const AdminAuthAgreementsRouteWithChildren =
+  AdminAuthAgreementsRoute._addFileChildren(AdminAuthAgreementsRouteChildren)
+
+interface AdminAuthRouteRouteChildren {
+  AdminAuthActiveRoute: typeof AdminAuthActiveRoute
+  AdminAuthAgreementsRoute: typeof AdminAuthAgreementsRouteWithChildren
+  AdminAuthAuditRoute: typeof AdminAuthAuditRoute
+  AdminAuthCustomersRoute: typeof AdminAuthCustomersRoute
+  AdminAuthOverdueRoute: typeof AdminAuthOverdueRoute
+  AdminAuthPaymentsRoute: typeof AdminAuthPaymentsRoute
+  AdminAuthReportsRoute: typeof AdminAuthReportsRoute
+  AdminAuthReturnsRoute: typeof AdminAuthReturnsRoute
+  AdminAuthSettingsRoute: typeof AdminAuthSettingsRoute
+  AdminAuthVehiclesRoute: typeof AdminAuthVehiclesRoute
+  AdminAuthIndexRoute: typeof AdminAuthIndexRoute
+}
+
+const AdminAuthRouteRouteChildren: AdminAuthRouteRouteChildren = {
+  AdminAuthActiveRoute: AdminAuthActiveRoute,
+  AdminAuthAgreementsRoute: AdminAuthAgreementsRouteWithChildren,
+  AdminAuthAuditRoute: AdminAuthAuditRoute,
+  AdminAuthCustomersRoute: AdminAuthCustomersRoute,
+  AdminAuthOverdueRoute: AdminAuthOverdueRoute,
+  AdminAuthPaymentsRoute: AdminAuthPaymentsRoute,
+  AdminAuthReportsRoute: AdminAuthReportsRoute,
+  AdminAuthReturnsRoute: AdminAuthReturnsRoute,
+  AdminAuthSettingsRoute: AdminAuthSettingsRoute,
+  AdminAuthVehiclesRoute: AdminAuthVehiclesRoute,
+  AdminAuthIndexRoute: AdminAuthIndexRoute,
+}
+
+const AdminAuthRouteRouteWithChildren = AdminAuthRouteRoute._addFileChildren(
+  AdminAuthRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
   FleetRoute: FleetRoute,
+  RentalAgreementRoute: RentalAgreementRoute,
+  AdminAuthRouteRoute: AdminAuthRouteRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

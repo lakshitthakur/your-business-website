@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { listCustomers } from "@/lib/server/customers";
+import { listCustomers } from "@/lib/customers";
 
 export const Route = createFileRoute("/admin/_auth/customers")({
   component: CustomersPage,

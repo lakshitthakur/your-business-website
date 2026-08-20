@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { adminLogin, getAdminSession, setupAdmin } from "@/lib/server/admin-auth";
+import { adminLogin, getAdminSession, setupAdmin } from "@/lib/admin-auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/login")({

@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate, Outlet } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { getAdminSession, adminLogin, adminLogout, setupAdmin } from "@/lib/server/admin-auth";
+import { createFileRoute, Link, useNavigate, Outlet, redirect } from "@tanstack/react-router";
+import { useState } from "react";
+import { getAdminSession, adminLogout } from "@/lib/admin-auth";
 import { toast } from "sonner";
 import {
   LayoutDashboard,
@@ -20,7 +20,9 @@ import {
 export const Route = createFileRoute("/admin/_auth")({
   beforeLoad: async () => {
     const session = await getAdminSession();
-    if (!session) throw new Error("Unauthorized");
+    if (!session) {
+      throw redirect({ to: "/admin/login" });
+    }
     return { admin: session };
   },
   component: AdminLayout,

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { listAgreements, recordReturn } from "@/lib/server/agreements";
+import { listAgreements, recordReturn } from "@/lib/agreements";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/_auth/returns")({

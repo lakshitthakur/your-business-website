@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { listAgreements, updateAgreement, approveAgreement, activateAgreement, addNote } from "@/lib/server/agreements";
+import { listAgreements, updateAgreement, approveAgreement, activateAgreement, addNote } from "@/lib/agreements";
 import { toast } from "sonner";
 import { Search, Filter, Eye, Check, X, Play } from "lucide-react";
 

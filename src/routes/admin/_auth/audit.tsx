@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getAuditLogs } from "@/lib/server/agreements";
+import { getAuditLogs } from "@/lib/agreements";
 
 export const Route = createFileRoute("/admin/_auth/audit")({
   component: AuditPage,

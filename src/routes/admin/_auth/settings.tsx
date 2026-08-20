@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getSettings, updateSettings } from "@/lib/server/agreements";
+import { getSettings, updateSettings } from "@/lib/agreements";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/_auth/settings")({

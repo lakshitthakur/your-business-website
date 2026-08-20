@@ -3,6 +3,12 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
+type CloudflareEnv = {
+  DB: D1Database;
+  BUCKET: R2Bucket;
+  [key: string]: unknown;
+};
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
@@ -18,8 +24,6 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-// h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
@@ -45,16 +49,20 @@ function isH3SwallowedErrorBody(body: string): boolean {
 }
 
 export default {
-  async fetch(request: Request, env: unknown, ctx: unknown) {
+  async fetch(request: Request, env: CloudflareEnv, ctx: unknown) {
+    (globalThis as any).__WORKER_ENV__ = env;
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
-      console.error(error);
-      return new Response(renderErrorPage(), {
+      console.error("FATAL ERROR in worker:", error);
+      if (error instanceof Error) {
+        console.error("Stack:", error.stack);
+      }
+      return new Response(`Error: ${String(error)}`, {
         status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
+        headers: { "content-type": "text/plain; charset=utf-8" },
       });
     }
   },

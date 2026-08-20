@@ -1,13 +1,26 @@
-import { getCloudflareContext } from "@tanstack/react-start/server";
+let _db: D1Database | null = null;
+let _bucket: R2Bucket | null = null;
 
-export function getDB() {
-  const ctx = getCloudflareContext();
-  return ctx.env.DB as D1Database;
+export function getDB(): D1Database {
+  const env = (globalThis as any).__WORKER_ENV__;
+  if (!_db && env?.DB) {
+    _db = env.DB;
+  }
+  if (!_db) {
+    throw new Error("getDB() failed: D1 binding not available. Check that the Worker was initialized with env.");
+  }
+  return _db;
 }
 
-export function getBucket() {
-  const ctx = getCloudflareContext();
-  return ctx.env.BUCKET as R2Bucket;
+export function getBucket(): R2Bucket {
+  const env = (globalThis as any).__WORKER_ENV__;
+  if (!_bucket && env?.BUCKET) {
+    _bucket = env.BUCKET;
+  }
+  if (!_bucket) {
+    throw new Error("getBucket() failed: R2 binding not available. Check that the Worker was initialized with env.");
+  }
+  return _bucket;
 }
 
 export function generateId(): string {

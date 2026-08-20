@@ -1,6 +1,5 @@
 import { createServerFn, createMiddleware } from "@tanstack/react-start";
 import { getDB, generateId } from "@/lib/db";
-import { getRequest, setCookie, getCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const ADMIN_SESSION_COOKIE = "pr_admin_session";
@@ -15,48 +14,50 @@ async function hashPassword(password: string): Promise<string> {
     .join("");
 }
 
-function getSession(): { admin_id: string; email: string } | null {
-  const request = getRequest();
-  if (!request) return null;
-  const cookieHeader = request.headers.get("cookie") || "";
-  const cookies = Object.fromEntries(
-    cookieHeader.split(";").map((c) => {
-      const [k, ...v] = c.trim().split("=");
-      return [k, v.join("=")];
-    })
-  );
-  const sessionCookie = cookies[ADMIN_SESSION_COOKIE];
+function cookieOptions(secure: boolean, maxAge: number) {
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: "lax" as const,
+    maxAge,
+    path: "/",
+  };
+}
+
+async function isSecureRequest(): Promise<boolean> {
+  const { getRequest } = await import("@tanstack/react-start/server");
+  try {
+    const request = getRequest();
+    return new URL(request.url).protocol === "https:";
+  } catch {
+    return true;
+  }
+}
+
+async function getSession(): Promise<{ admin_id: string; email: string } | null> {
+  const { getCookie } = await import("@tanstack/react-start/server");
+  const sessionCookie = getCookie(ADMIN_SESSION_COOKIE);
   if (!sessionCookie) return null;
   try {
-    return JSON.parse(atob(sessionCookie));
+    return JSON.parse(atob(decodeURIComponent(sessionCookie)));
   } catch {
     return null;
   }
 }
 
-function setSession(adminId: string, email: string) {
+async function setSession(adminId: string, email: string) {
+  const { setCookie } = await import("@tanstack/react-start/server");
   const session = btoa(JSON.stringify({ admin_id: adminId, email }));
-  setCookie(ADMIN_SESSION_COOKIE, session, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: SESSION_MAX_AGE,
-    path: "/",
-  });
+  setCookie(ADMIN_SESSION_COOKIE, session, cookieOptions(await isSecureRequest(), SESSION_MAX_AGE));
 }
 
-function clearSession() {
-  setCookie(ADMIN_SESSION_COOKIE, "", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 0,
-    path: "/",
-  });
+async function clearSession() {
+  const { deleteCookie } = await import("@tanstack/react-start/server");
+  deleteCookie(ADMIN_SESSION_COOKIE, { path: "/" });
 }
 
 export const requireAdmin = createMiddleware({ type: "function" }).server(async ({ next }) => {
-  const session = getSession();
+  const session = await getSession();
   if (!session) throw new Error("Unauthorized");
   return next({ context: { adminId: session.admin_id, adminEmail: session.email } });
 });
@@ -79,7 +80,7 @@ export const adminLogin = createServerFn({ method: "POST" })
       .bind(admin.id)
       .run();
 
-    setSession(admin.id, admin.email);
+    await setSession(admin.id, admin.email);
     await db
       .prepare("INSERT INTO audit_logs (id, user_id, action, entity_type, entity_id) VALUES (?, ?, ?, ?, ?)")
       .bind(generateId(), admin.id, "admin_login", "admin_user", admin.id)
@@ -89,12 +90,12 @@ export const adminLogin = createServerFn({ method: "POST" })
   });
 
 export const adminLogout = createServerFn({ method: "POST" }).handler(async () => {
-  clearSession();
+  await clearSession();
   return { success: true };
 });
 
 export const getAdminSession = createServerFn({ method: "GET" }).handler(async () => {
-  const session = getSession();
+  const session = await getSession();
   if (!session) return null;
   const db = getDB();
   const admin = await db
@@ -118,14 +119,14 @@ export const setupAdmin = createServerFn({ method: "POST" })
       .bind(id, data.email.toLowerCase().trim(), hash, data.name)
       .run();
 
-    setSession(id, data.email);
+    await setSession(id, data.email);
     return { success: true, id };
   });
 
 export const changePassword = createServerFn({ method: "POST" })
   .validator((data: { current_password: string; new_password: string }) => data)
   .handler(async ({ data }) => {
-    const session = getSession();
+    const session = await getSession();
     if (!session) throw new Error("Unauthorized");
 
     const db = getDB();

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { getReports } from "@/lib/server/agreements";
+import { getReports } from "@/lib/agreements";
 
 export const Route = createFileRoute("/admin/_auth/reports")({
   component: ReportsPage,

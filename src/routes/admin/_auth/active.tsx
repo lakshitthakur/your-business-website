@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { listAgreements } from "@/lib/server/agreements";
+import { listAgreements } from "@/lib/agreements";
 
 export const Route = createFileRoute("/admin/_auth/active")({
   component: ActiveRentalsPage,
