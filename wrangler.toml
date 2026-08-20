@@ -1,0 +1,19 @@
+name = "punjab-rentals"
+main = "./src/server.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "punjab-rentals-db"
+database_id = "b3c490bc-f8f5-4962-8055-f51ee6514b96"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "punjab-rentals-files"
+
+[vars]
+ENVIRONMENT = "production"

@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { getSignedCarPhotos } from "@/lib/carPhotos";
+import { listVehicles } from "@/lib/server/vehicles";
 import { Car, Truck, Package, Phone, Search } from "lucide-react";
 
 type Vehicle = "all" | "car" | "suv" | "van" | "truck";
@@ -12,7 +11,6 @@ type CarRow = {
   make: string;
   model: string;
   year: number;
-  image_path: string | null;
   description: string | null;
   weekly_price: number | null;
   available: boolean;
@@ -41,23 +39,14 @@ const TYPES: { key: Vehicle; label: string; icon: React.ReactNode }[] = [
 
 function FleetPage() {
   const [cars, setCars] = useState<CarRow[]>([]);
-  const [photos, setPhotos] = useState<Record<string, string>>({});
   const [type, setType] = useState<Vehicle>("all");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("cars")
-        .select("id, vehicle_type, make, model, year, image_path, description, weekly_price, available")
-        .eq("available", true)
-        .order("created_at", { ascending: false });
-      if (!error && data) {
-        setCars(data as CarRow[]);
-        const paths = data.map((c) => c.image_path).filter(Boolean) as string[];
-        setPhotos(await getSignedCarPhotos(paths));
-      }
+      const data = await listVehicles({ data: { available: true } });
+      setCars((data as CarRow[]) || []);
       setLoading(false);
     })();
   }, []);
@@ -141,18 +130,9 @@ function FleetPage() {
             {filtered.map((c) => (
               <article key={c.id} className="overflow-hidden rounded-2xl border border-border bg-card">
                 <div className="aspect-[4/3] overflow-hidden bg-secondary">
-                  {c.image_path && photos[c.image_path] ? (
-                    <img
-                      src={photos[c.image_path]}
-                      alt={`${c.year} ${c.make} ${c.model}`}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                      <Car className="h-10 w-10" />
-                    </div>
-                  )}
+                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                    <Car className="h-10 w-10" />
+                  </div>
                 </div>
                 <div className="p-5">
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">
