@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { listVehicles } from "@/lib/vehicles";
-import { Car, Truck, Package, Phone, Search } from "lucide-react";
+import { Car, Truck, Package, Phone, Search, Check } from "lucide-react";
 
 type Vehicle = "all" | "car" | "suv" | "van" | "truck";
 
@@ -38,6 +38,7 @@ const TYPES: { key: Vehicle; label: string; icon: React.ReactNode }[] = [
 ];
 
 function FleetPage() {
+  const navigate = useNavigate();
   const [cars, setCars] = useState<CarRow[]>([]);
   const [type, setType] = useState<Vehicle>("all");
   const [query, setQuery] = useState("");
@@ -59,6 +60,10 @@ function FleetPage() {
       return true;
     });
   }, [cars, type, query]);
+
+  function handleSelectVehicle(vehicle: CarRow) {
+    navigate({ to: "/rental-agreement", search: { vehicleId: vehicle.id } });
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -122,7 +127,7 @@ function FleetPage() {
           <div className="rounded-2xl border border-dashed border-border p-12 text-center">
             <p className="text-lg font-semibold">No vehicles match your search</p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Try clearing filters or call Gary directly on 0404 115 670.
+              Try clearing filters or <a href="tel:0404115670" className="text-primary hover:underline">call us</a> on 0404 115 670.
             </p>
           </div>
         ) : (
@@ -155,12 +160,12 @@ function FleetPage() {
                         <span className="text-muted-foreground">Call for pricing</span>
                       )}
                     </div>
-                    <a
-                      href="tel:0404115670"
+                    <button
+                      onClick={() => handleSelectVehicle(c)}
                       className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
                     >
-                      <Phone className="h-3.5 w-3.5" /> Enquire
-                    </a>
+                      <Check className="h-3.5 w-3.5" /> Select
+                    </button>
                   </div>
                 </div>
               </article>

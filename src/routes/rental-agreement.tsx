@@ -1,13 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createCustomer } from "@/lib/customers";
 import { createAgreement, saveSignature, getSettings } from "@/lib/agreements";
 import { downloadAgreementPdf } from "@/lib/pdfs";
+import { getVehicle } from "@/lib/vehicles";
 import { SignaturePad } from "@/components/SignaturePad";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Check, FileText, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, FileText, Download, AlertCircle, Car } from "lucide-react";
 
 export const Route = createFileRoute("/rental-agreement")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      vehicleId: (search.vehicleId as string) || "",
+    };
+  },
   head: () => ({
     meta: [
       { title: "Start Rental Agreement — Punjab Rentals" },
@@ -51,13 +57,14 @@ const TERMS_CLAUSES = [
   { key: "truck_conditions", label: "Truck-specific: Do not exceed GVM. Load must be properly secured. Driver must hold appropriate licence." },
 ];
 
-function RentalAgreementPage() {
+function RentalAgreementPage({ search }: { search: { vehicleId: string } }) {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [hireType, setHireType] = useState<"individual" | "business">("individual");
   const [submitting, setSubmitting] = useState(false);
   const [agreementId, setAgreementId] = useState<string | null>(null);
   const [agreementNo, setAgreementNo] = useState<string | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
 
   const [business, setBusiness] = useState({
     entity_name: "",
@@ -113,19 +120,113 @@ function RentalAgreementPage() {
   });
 
   const [insurance, setInsurance] = useState({
+    dob: "",
     age_category: "25_to_70",
-    standard_excess: 2000,
-    custom_excess: 3000,
-    total_loss_excess: 5000,
+    standard_excess: 1500,
+    writeoff_excess: 2000,
+    combined_excess: 3500,
   });
+
+  // Calculate age from DOB
+  function calculateAge(dob: string): number {
+    if (!dob) return 0;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  const driverAge = calculateAge(insurance.dob);
+  const isEligibleAge = driverAge >= 21;
+
+  // Validation for each step
+  function validateStep0(): string | null {
+    if (hireType === "business") {
+      if (!business.entity_name.trim()) return "Entity name is required";
+      if (!business.authorised_person.trim()) return "Authorised person is required";
+      if (!business.entity_email.trim()) return "Email is required";
+      if (!business.entity_phone.trim()) return "Phone is required";
+    }
+    return null;
+  }
+
+  function validateStep1(): string | null {
+    if (!driver.first_name.trim()) return "First name is required";
+    if (!driver.last_name.trim()) return "Last name is required";
+    if (!driver.phone.trim()) return "Phone is required";
+    if (!driver.licence_number.trim()) return "Licence number is required";
+    if (!driver.licence_expiry) return "Licence expiry is required";
+    if (!driver.licence_state.trim()) return "Licence state is required";
+    if (!driver.emergency_contact_name.trim()) return "Emergency contact name is required";
+    if (!driver.emergency_contact_phone.trim()) return "Emergency contact phone is required";
+    return null;
+  }
+
+  function validateStep2(): string | null {
+    if (!rental.rental_start) return "Rental start date is required";
+    if (!rental.rental_end) return "Rental end date is required";
+    if (rental.rental_amount <= 0) return "Rental amount is required";
+    return null;
+  }
+
+  function validateStep3(): string | null {
+    if (!insurance.dob) return "Date of birth is required";
+    if (driverAge < 21) return "Driver must be at least 21 years old";
+    return null;
+  }
+
+  function validateCurrentStep(): string | null {
+    switch (step) {
+      case 0: return validateStep0();
+      case 1: return validateStep1();
+      case 2: return validateStep2();
+      case 3: return validateStep3();
+      case 4: return allTermsAccepted ? null : "All terms must be accepted";
+      default: return null;
+    }
+  }
+
+  const stepError = validateCurrentStep();
 
   const [acceptedTerms, setAcceptedTerms] = useState<Record<string, boolean>>({});
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [signerName, setSignerName] = useState("");
 
+  // Fetch selected vehicle
+  useEffect(() => {
+    if (search.vehicleId) {
+      getVehicle({ data: { id: search.vehicleId } })
+        .then((vehicle: any) => {
+          if (vehicle) {
+            setSelectedVehicle(vehicle);
+            setRental((prev) => ({
+              ...prev,
+              vehicle_id: vehicle.id,
+              rental_amount: vehicle.weekly_price || 0,
+              bond: vehicle.bond || 0,
+              km_allowance: vehicle.km_allowance || 0,
+              extra_km_rate: vehicle.extra_km_rate || 0,
+            }));
+          }
+        })
+        .catch(() => {
+          // Vehicle not found or fetch failed — user can select one later
+        });
+    }
+  }, [search.vehicleId]);
+
   const allTermsAccepted = TERMS_CLAUSES.every((t) => acceptedTerms[t.key]);
 
   function nextStep() {
+    const error = validateCurrentStep();
+    if (error) {
+      toast.error(error);
+      return;
+    }
     if (step < STEPS.length - 1) setStep(step + 1);
   }
 
@@ -134,6 +235,11 @@ function RentalAgreementPage() {
   }
 
   async function handleSubmit() {
+    // Final server-side validation
+    if (driverAge < 21) {
+      toast.error("Driver must be at least 21 years old");
+      return;
+    }
     if (!allTermsAccepted || !signatureData || !signerName) {
       toast.error("Please accept all terms and provide your signature");
       return;
@@ -167,10 +273,11 @@ function RentalAgreementPage() {
           amount_due_pickup: rental.amount_due_pickup,
           payment_method: rental.payment_method,
           payment_notes: rental.payment_notes,
-          insurance_age_category: insurance.age_category,
-          standard_excess: insurance.standard_excess,
-          custom_excess: insurance.custom_excess,
-          total_loss_excess: insurance.total_loss_excess,
+          // Fixed excess values
+          insurance_age_category: driverAge >= 21 && driverAge < 25 ? "under_25" : driverAge >= 25 && driverAge <= 70 ? "25_to_70" : "over_70",
+          standard_excess: 1500,
+          custom_excess: 2000,
+          total_loss_excess: 3500,
           terms_accepted: true,
           terms,
         },
@@ -338,7 +445,37 @@ function RentalAgreementPage() {
           {step === 2 && (
             <div className="space-y-6">
               <h2 className="text-xl font-bold">Vehicle & Rental Details</h2>
-              <p className="text-sm text-muted-foreground">Leave vehicle selection blank if to be assigned by admin.</p>
+              {selectedVehicle ? (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-primary/10 p-2">
+                      <Car className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}</p>
+                      <p className="text-sm text-muted-foreground capitalize">{selectedVehicle.vehicle_type} {selectedVehicle.registration && `• ${selectedVehicle.registration}`}</p>
+                    </div>
+                    <button
+                      onClick={() => navigate({ to: "/fleet" })}
+                      className="ml-auto text-sm text-primary hover:underline"
+                    >
+                      Change
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border p-6 text-center">
+                  <Car className="mx-auto h-10 w-10 text-muted-foreground" />
+                  <p className="mt-3 font-medium">No vehicle selected</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Browse our fleet to select a vehicle for your rental.</p>
+                  <a
+                    href="/fleet"
+                    className="mt-4 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    <Car className="h-4 w-4" /> Browse Fleet
+                  </a>
+                </div>
+              )}
               <div className="grid gap-4 md:grid-cols-2">
                 <Input label="Rental Start Date" type="date" value={rental.rental_start} onChange={(v) => setRental({ ...rental, rental_start: v })} required />
                 <Input label="Rental End Date" type="date" value={rental.rental_end} onChange={(v) => setRental({ ...rental, rental_end: v })} required />
@@ -383,23 +520,67 @@ function RentalAgreementPage() {
             <div className="space-y-6">
               <h2 className="text-xl font-bold">Insurance</h2>
               <div className="grid gap-4 md:grid-cols-2">
-                <Select
-                  label="Driver Age Category"
-                  value={insurance.age_category}
-                  onChange={(v) => setInsurance({ ...insurance, age_category: v })}
-                  options={[
-                    { value: "under_25", label: "Under 25" },
-                    { value: "25_to_70", label: "25 - 70" },
-                    { value: "over_70", label: "Over 70" },
-                  ]}
-                />
-                <Input label="Standard Excess ($)" type="number" value={insurance.standard_excess} onChange={(v) => setInsurance({ ...insurance, standard_excess: Number(v) })} />
-                <Input label="Custom Excess ($)" type="number" value={insurance.custom_excess} onChange={(v) => setInsurance({ ...insurance, custom_excess: Number(v) })} />
-                <Input label="Total Loss Excess ($)" type="number" value={insurance.total_loss_excess} onChange={(v) => setInsurance({ ...insurance, total_loss_excess: Number(v) })} />
+                <div>
+                  <label className="text-sm font-medium">Date of Birth <span className="text-destructive">*</span></label>
+                  <input
+                    type="date"
+                    value={insurance.dob}
+                    onChange={(e) => setInsurance({ ...insurance, dob: e.target.value })}
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Driver Age</label>
+                  <div className="mt-1 flex items-center gap-2 rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
+                    {driverAge > 0 ? (
+                      <>
+                        <span className="font-bold text-foreground">{driverAge}</span> years old
+                        {!isEligibleAge && (
+                          <span className="ml-2 flex items-center gap-1 text-destructive">
+                            <AlertCircle className="h-4 w-4" /> Must be 21+
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Enter DOB above</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Standard Excess</label>
+                  <div className="mt-1 rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm font-semibold">
+                    $1,500 <span className="text-xs font-normal text-muted-foreground">(read-only)</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Write-off Excess</label>
+                  <div className="mt-1 rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm font-semibold">
+                    $2,000 <span className="text-xs font-normal text-muted-foreground">(read-only)</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Standard + Write-off Excess</label>
+                  <div className="mt-1 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-bold">
+                    $3,500 <span className="text-xs font-normal text-muted-foreground">(read-only)</span>
+                  </div>
+                </div>
               </div>
+              {!isEligibleAge && driverAge > 0 && (
+                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">You must be at least 21 years old to rent a vehicle.</p>
+                      <p className="mt-1">Current age: {driverAge} years. Minimum required: 21 years.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="rounded-md border border-border bg-secondary/50 p-4 text-sm text-muted-foreground">
                 <p className="font-semibold text-foreground">Insurance Conditions</p>
                 <ul className="mt-2 space-y-1">
+                  <li>• Minimum driver age: 21 years</li>
                   <li>• Excess amounts apply per incident</li>
                   <li>• Insurance does not cover unauthorized drivers</li>
                   <li>• Claims must be reported within 24 hours</li>
@@ -457,6 +638,15 @@ function RentalAgreementPage() {
                 </ReviewSection>
 
                 <ReviewSection title="Rental Details">
+                  {selectedVehicle ? (
+                    <>
+                      <p><strong>Vehicle:</strong> {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}</p>
+                      <p><strong>Type:</strong> {selectedVehicle.vehicle_type}</p>
+                      {selectedVehicle.registration && <p><strong>Registration:</strong> {selectedVehicle.registration}</p>}
+                    </>
+                  ) : (
+                    <p className="text-muted-foreground">No vehicle selected — will be assigned by admin</p>
+                  )}
                   <p>Period: {rental.rental_start} to {rental.rental_end}</p>
                   <p>Amount: ${rental.rental_amount} / {rental.rental_cycle}</p>
                   <p>Bond: ${rental.bond}</p>
@@ -464,10 +654,10 @@ function RentalAgreementPage() {
                 </ReviewSection>
 
                 <ReviewSection title="Insurance">
-                  <p>Age Category: {insurance.age_category}</p>
-                  <p>Standard Excess: ${insurance.standard_excess}</p>
-                  <p>Custom Excess: ${insurance.custom_excess}</p>
-                  <p>Total Loss Excess: ${insurance.total_loss_excess}</p>
+                  <p>Driver Age: {driverAge} years</p>
+                  <p>Standard Excess: $1,500</p>
+                  <p>Write-off Excess: $2,000</p>
+                  <p>Standard + Write-off Excess: $3,500</p>
                 </ReviewSection>
 
                 <ReviewSection title="Terms Accepted">
@@ -588,7 +778,8 @@ function RentalAgreementPage() {
             ) : (
               <button
                 onClick={nextStep}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+                disabled={!!stepError}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
               >
                 Next <ChevronRight className="h-4 w-4" />
               </button>

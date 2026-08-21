@@ -26,13 +26,36 @@ const agreementSchema = z.object({
   terms_version: z.string().default("v1"),
   agreement_version: z.string().default("v1"),
   terms: z.array(z.object({ clause_key: z.string(), clause_label: z.string().optional() })).default([]),
-  terms_accepted: z.boolean().default(false),
 });
 
 export const createAgreement = createServerFn({ method: "POST" })
   .validator((data: z.infer<typeof agreementSchema>) => agreementSchema.parse(data))
   .handler(async ({ data }) => {
-    const db = getDB();
+    // Server-side validation: Enforce fixed excess values
+    const standardExcess = data.standard_excess ?? 1500;
+    const writeoffExcess = data.custom_excess ?? 2000;
+    const totalLossExcess = data.total_loss_excess ?? 3500;
+
+    // Validate excess values are not modified
+    if (data.standard_excess !== undefined && data.standard_excess !== 1500) {
+      throw new Error("Invalid standard excess value");
+    }
+    if (data.custom_excess !== undefined && data.custom_excess !== 2000) {
+      throw new Error("Invalid write-off excess value");
+    }
+    if (data.total_loss_excess !== undefined && data.total_loss_excess !== 3500) {
+      throw new Error("Invalid total loss excess value");
+    }
+
+    // Validate vehicle is available if specified
+    if (data.vehicle_id) {
+      const vehicle = await db.prepare("SELECT * FROM vehicles WHERE id = ?").bind(data.vehicle_id).first<any>();
+      if (!vehicle) throw new Error("Vehicle not found");
+      if (vehicle.status !== "Available" && vehicle.available !== 1) {
+        throw new Error("Vehicle is not available for rental");
+      }
+    }
+
     const id = generateId();
     const agreement_no = await getNextAgreementNo(db);
     const now = new Date().toISOString();
@@ -58,14 +81,14 @@ export const createAgreement = createServerFn({ method: "POST" })
         data.pickup_odometer || null,
         data.deposit,
         data.amount_due_pickup,
-        data.payment_method || null,
         data.payment_notes || null,
         data.insurance_age_category || null,
-        data.standard_excess || null,
-        data.custom_excess || null,
-        data.total_loss_excess || null,
+        standardExcess,
+        writeoffExcess,
+        totalLossExcess,
         data.terms_version,
         data.agreement_version,
+        data.terms_accepted ? 1 : 0,
         data.terms_accepted ? 1 : 0,
         data.terms_accepted ? now : null
       )

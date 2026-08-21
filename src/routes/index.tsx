@@ -85,7 +85,7 @@ function Index() {
                 <Search className="h-4 w-4" /> Browse fleet
               </Link>
               <Link
-                to="/rental-agreement"
+                to="/fleet"
                 className="inline-flex items-center gap-2 rounded-md bg-[var(--brand-dark)] px-6 py-3 font-semibold text-white hover:opacity-90"
               >
                 Start Rental Agreement
@@ -94,7 +94,7 @@ function Index() {
                 href="tel:0404115670"
                 className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-semibold hover:bg-secondary"
               >
-                <Phone className="h-4 w-4" /> Call Gary
+                <Phone className="h-4 w-4" /> Book on Call
               </a>
             </div>
 
