@@ -26,26 +26,16 @@ const agreementSchema = z.object({
   terms_version: z.string().default("v1"),
   agreement_version: z.string().default("v1"),
   terms: z.array(z.object({ clause_key: z.string(), clause_label: z.string().optional() })).default([]),
+  terms_accepted: z.boolean().default(false),
 });
 
 export const createAgreement = createServerFn({ method: "POST" })
   .validator((data: z.infer<typeof agreementSchema>) => agreementSchema.parse(data))
   .handler(async ({ data }) => {
-    // Server-side validation: Enforce fixed excess values
+    const db = getDB();
     const standardExcess = data.standard_excess ?? 1500;
     const writeoffExcess = data.custom_excess ?? 2000;
     const totalLossExcess = data.total_loss_excess ?? 3500;
-
-    // Validate excess values are not modified
-    if (data.standard_excess !== undefined && data.standard_excess !== 1500) {
-      throw new Error("Invalid standard excess value");
-    }
-    if (data.custom_excess !== undefined && data.custom_excess !== 2000) {
-      throw new Error("Invalid write-off excess value");
-    }
-    if (data.total_loss_excess !== undefined && data.total_loss_excess !== 3500) {
-      throw new Error("Invalid total loss excess value");
-    }
 
     // Validate vehicle is available if specified
     if (data.vehicle_id) {
@@ -81,6 +71,7 @@ export const createAgreement = createServerFn({ method: "POST" })
         data.pickup_odometer || null,
         data.deposit,
         data.amount_due_pickup,
+        data.payment_method || null,
         data.payment_notes || null,
         data.insurance_age_category || null,
         standardExcess,
@@ -88,7 +79,6 @@ export const createAgreement = createServerFn({ method: "POST" })
         totalLossExcess,
         data.terms_version,
         data.agreement_version,
-        data.terms_accepted ? 1 : 0,
         data.terms_accepted ? 1 : 0,
         data.terms_accepted ? now : null
       )

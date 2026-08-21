@@ -5,7 +5,7 @@ import { downloadAgreementPdf, downloadReceiptPdf } from "@/lib/pdfs";
 import { toast } from "sonner";
 import { ArrowLeft, Download, Plus, FileText, CreditCard, Car, User, Check } from "lucide-react";
 
-export const Route = createFileRoute("/admin/_auth/agreements/$agreementId")({
+export const Route = createFileRoute("/admin/_auth/agreements_/$agreementId")({
   head: () => ({
     meta: [
       { title: "Agreement Detail — Punjab Rentals Admin" },

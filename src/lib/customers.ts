@@ -2,11 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { getDB, generateId, getNextAgreementNo } from "@/lib/db";
 import { z } from "zod";
 
+const optionalEmail = z
+  .union([z.string().email(), z.literal("")])
+  .optional()
+  .transform((v) => (v ? v : undefined));
+
 const customerSchema = z.object({
-  first_name: z.string().min(1),
-  last_name: z.string().min(1),
-  email: z.string().email().optional(),
-  phone: z.string().min(1),
+  first_name: z.string().optional().default(""),
+  last_name: z.string().optional().default(""),
+  email: optionalEmail,
+  phone: z.string().optional().default(""),
   dob: z.string().optional(),
   licence_number: z.string().optional(),
   licence_expiry: z.string().optional(),
@@ -25,7 +30,7 @@ const customerSchema = z.object({
   entity_type: z.string().optional(),
   authorised_person: z.string().optional(),
   authorised_position: z.string().optional(),
-  entity_email: z.string().optional(),
+  entity_email: optionalEmail,
   entity_phone: z.string().optional(),
   entity_address: z.string().optional(),
   entity_licence_number: z.string().optional(),
@@ -46,10 +51,10 @@ export const createCustomer = createServerFn({ method: "POST" })
       )
       .bind(
         id,
-        data.first_name,
-        data.last_name,
+        data.first_name || "",
+        data.last_name || "",
         data.email || null,
-        data.phone,
+        data.phone || null,
         data.dob || null,
         data.licence_number || null,
         data.licence_expiry || null,

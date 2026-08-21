@@ -25,7 +25,7 @@ import { Route as AdminAuthReportsRouteImport } from './routes/admin/_auth/repor
 import { Route as AdminAuthReturnsRouteImport } from './routes/admin/_auth/returns'
 import { Route as AdminAuthSettingsRouteImport } from './routes/admin/_auth/settings'
 import { Route as AdminAuthVehiclesRouteImport } from './routes/admin/_auth/vehicles'
-import { Route as AdminAuthAgreementsAgreementIdRouteImport } from './routes/admin/_auth/agreements.$agreementId'
+import { Route as AdminAuthAgreementsAgreementIdRouteImport } from './routes/admin/_auth/agreements_.$agreementId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -109,9 +109,9 @@ const AdminAuthVehiclesRoute = AdminAuthVehiclesRouteImport.update({
 } as any)
 const AdminAuthAgreementsAgreementIdRoute =
   AdminAuthAgreementsAgreementIdRouteImport.update({
-    id: '/$agreementId',
-    path: '/$agreementId',
-    getParentRoute: () => AdminAuthAgreementsRoute,
+    id: '/agreements_/$agreementId',
+    path: '/agreements/$agreementId',
+    getParentRoute: () => AdminAuthRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -121,7 +121,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminAuthRouteRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/active': typeof AdminAuthActiveRoute
-  '/admin/agreements': typeof AdminAuthAgreementsRouteWithChildren
+  '/admin/agreements': typeof AdminAuthAgreementsRoute
   '/admin/audit': typeof AdminAuthAuditRoute
   '/admin/customers': typeof AdminAuthCustomersRoute
   '/admin/overdue': typeof AdminAuthOverdueRoute
@@ -139,7 +139,7 @@ export interface FileRoutesByTo {
   '/rental-agreement': typeof RentalAgreementRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/active': typeof AdminAuthActiveRoute
-  '/admin/agreements': typeof AdminAuthAgreementsRouteWithChildren
+  '/admin/agreements': typeof AdminAuthAgreementsRoute
   '/admin/audit': typeof AdminAuthAuditRoute
   '/admin/customers': typeof AdminAuthCustomersRoute
   '/admin/overdue': typeof AdminAuthOverdueRoute
@@ -159,7 +159,7 @@ export interface FileRoutesById {
   '/admin/_auth': typeof AdminAuthRouteRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/_auth/active': typeof AdminAuthActiveRoute
-  '/admin/_auth/agreements': typeof AdminAuthAgreementsRouteWithChildren
+  '/admin/_auth/agreements': typeof AdminAuthAgreementsRoute
   '/admin/_auth/audit': typeof AdminAuthAuditRoute
   '/admin/_auth/customers': typeof AdminAuthCustomersRoute
   '/admin/_auth/overdue': typeof AdminAuthOverdueRoute
@@ -169,7 +169,7 @@ export interface FileRoutesById {
   '/admin/_auth/settings': typeof AdminAuthSettingsRoute
   '/admin/_auth/vehicles': typeof AdminAuthVehiclesRoute
   '/admin/_auth/': typeof AdminAuthIndexRoute
-  '/admin/_auth/agreements/$agreementId': typeof AdminAuthAgreementsAgreementIdRoute
+  '/admin/_auth/agreements_/$agreementId': typeof AdminAuthAgreementsAgreementIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -227,7 +227,7 @@ export interface FileRouteTypes {
     | '/admin/_auth/settings'
     | '/admin/_auth/vehicles'
     | '/admin/_auth/'
-    | '/admin/_auth/agreements/$agreementId'
+    | '/admin/_auth/agreements_/$agreementId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -352,30 +352,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthVehiclesRouteImport
       parentRoute: typeof AdminAuthRouteRoute
     }
-    '/admin/_auth/agreements/$agreementId': {
-      id: '/admin/_auth/agreements/$agreementId'
-      path: '/$agreementId'
+    '/admin/_auth/agreements_/$agreementId': {
+      id: '/admin/_auth/agreements_/$agreementId'
+      path: '/agreements/$agreementId'
       fullPath: '/admin/agreements/$agreementId'
       preLoaderRoute: typeof AdminAuthAgreementsAgreementIdRouteImport
-      parentRoute: typeof AdminAuthAgreementsRoute
+      parentRoute: typeof AdminAuthRouteRoute
     }
   }
 }
 
-interface AdminAuthAgreementsRouteChildren {
-  AdminAuthAgreementsAgreementIdRoute: typeof AdminAuthAgreementsAgreementIdRoute
-}
-
-const AdminAuthAgreementsRouteChildren: AdminAuthAgreementsRouteChildren = {
-  AdminAuthAgreementsAgreementIdRoute: AdminAuthAgreementsAgreementIdRoute,
-}
-
-const AdminAuthAgreementsRouteWithChildren =
-  AdminAuthAgreementsRoute._addFileChildren(AdminAuthAgreementsRouteChildren)
-
 interface AdminAuthRouteRouteChildren {
   AdminAuthActiveRoute: typeof AdminAuthActiveRoute
-  AdminAuthAgreementsRoute: typeof AdminAuthAgreementsRouteWithChildren
+  AdminAuthAgreementsRoute: typeof AdminAuthAgreementsRoute
   AdminAuthAuditRoute: typeof AdminAuthAuditRoute
   AdminAuthCustomersRoute: typeof AdminAuthCustomersRoute
   AdminAuthOverdueRoute: typeof AdminAuthOverdueRoute
@@ -385,11 +374,12 @@ interface AdminAuthRouteRouteChildren {
   AdminAuthSettingsRoute: typeof AdminAuthSettingsRoute
   AdminAuthVehiclesRoute: typeof AdminAuthVehiclesRoute
   AdminAuthIndexRoute: typeof AdminAuthIndexRoute
+  AdminAuthAgreementsAgreementIdRoute: typeof AdminAuthAgreementsAgreementIdRoute
 }
 
 const AdminAuthRouteRouteChildren: AdminAuthRouteRouteChildren = {
   AdminAuthActiveRoute: AdminAuthActiveRoute,
-  AdminAuthAgreementsRoute: AdminAuthAgreementsRouteWithChildren,
+  AdminAuthAgreementsRoute: AdminAuthAgreementsRoute,
   AdminAuthAuditRoute: AdminAuthAuditRoute,
   AdminAuthCustomersRoute: AdminAuthCustomersRoute,
   AdminAuthOverdueRoute: AdminAuthOverdueRoute,
@@ -399,6 +389,7 @@ const AdminAuthRouteRouteChildren: AdminAuthRouteRouteChildren = {
   AdminAuthSettingsRoute: AdminAuthSettingsRoute,
   AdminAuthVehiclesRoute: AdminAuthVehiclesRoute,
   AdminAuthIndexRoute: AdminAuthIndexRoute,
+  AdminAuthAgreementsAgreementIdRoute: AdminAuthAgreementsAgreementIdRoute,
 }
 
 const AdminAuthRouteRouteWithChildren = AdminAuthRouteRoute._addFileChildren(
@@ -415,13 +406,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

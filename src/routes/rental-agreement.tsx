@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { createCustomer } from "@/lib/customers";
-import { createAgreement, saveSignature, getSettings } from "@/lib/agreements";
+import { createAgreement, saveSignature } from "@/lib/agreements";
 import { downloadAgreementPdf } from "@/lib/pdfs";
 import { getVehicle } from "@/lib/vehicles";
 import { SignaturePad } from "@/components/SignaturePad";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Check, FileText, Download, AlertCircle, Car } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Download, Car } from "lucide-react";
 
 export const Route = createFileRoute("/rental-agreement")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -35,7 +35,8 @@ const STEPS = [
   { id: "confirmation", label: "Confirmation" },
 ];
 
-const TERMS_CLAUSES = [
+/** General T&C shown to every renter (exact wording). */
+const GENERAL_TERMS = [
   { key: "interstate", label: "Interstate travel is permitted with prior approval. Vehicle must be returned to VIC." },
   { key: "return_notice", label: "Minimum 7 days notice required for early return. Early return fees may apply." },
   { key: "smoking", label: "No smoking, vaping, or pets allowed in the vehicle. Cleaning fees apply for violations." },
@@ -53,9 +54,27 @@ const TERMS_CLAUSES = [
   { key: "cleaning", label: "Vehicle must be returned in clean condition. Excessive cleaning fees may apply." },
   { key: "fuel", label: "Vehicle must be returned with the same fuel level as pickup. Refueling charges apply." },
   { key: "missing_equipment", label: "Customer is responsible for all equipment provided (spare tyre, jack, tools). Replacement fees apply." },
+];
+
+/** Car rental T&C (exact wording) — shown with general terms for car/suv/van. */
+const CAR_RENTAL_TERMS = [
   { key: "car_conditions", label: "Car-specific: No off-road use. No towing without approval. No rideshare without commercial insurance." },
+];
+
+/** Truck rental T&C (exact wording) — shown with general terms for truck. */
+const TRUCK_RENTAL_TERMS = [
   { key: "truck_conditions", label: "Truck-specific: Do not exceed GVM. Load must be properly secured. Driver must hold appropriate licence." },
 ];
+
+function getApplicableTerms(vehicleType?: string | null) {
+  const terms = [...GENERAL_TERMS];
+  if (vehicleType === "truck") {
+    terms.push(...TRUCK_RENTAL_TERMS);
+  } else if (vehicleType === "car" || vehicleType === "suv" || vehicleType === "van") {
+    terms.push(...CAR_RENTAL_TERMS);
+  }
+  return terms;
+}
 
 function RentalAgreementPage() {
   const search = Route.useSearch();
@@ -142,36 +161,6 @@ function RentalAgreementPage() {
   }
 
   const driverAge = calculateAge(insurance.dob);
-  const isEligibleAge = driverAge >= 21;
-
-  // Validation for each step
-  function validateStep0(): string | null {
-    return null;
-  }
-
-  function validateStep1(): string | null {
-    return null;
-  }
-
-  function validateStep2(): string | null {
-    return null;
-  }
-
-  function validateStep3(): string | null {
-    return null;
-  }
-
-  function validateCurrentStep(): string | null {
-    switch (step) {
-      case 0: return validateStep0();
-      case 1: return validateStep1();
-      case 2: return validateStep2();
-      case 3: return validateStep3();
-      default: return null;
-    }
-  }
-
-  const stepError = validateCurrentStep();
 
   const [acceptedTerms, setAcceptedTerms] = useState<Record<string, boolean>>({});
   const [signatureData, setSignatureData] = useState<string | null>(null);
@@ -200,14 +189,9 @@ function RentalAgreementPage() {
     }
   }, [search.vehicleId]);
 
-  const allTermsAccepted = TERMS_CLAUSES.every((t) => acceptedTerms[t.key]);
+  const applicableTerms = getApplicableTerms(selectedVehicle?.vehicle_type);
 
   function nextStep() {
-    const error = validateCurrentStep();
-    if (error) {
-      toast.error(error);
-      return;
-    }
     if (step < STEPS.length - 1) setStep(step + 1);
   }
 
@@ -216,22 +200,12 @@ function RentalAgreementPage() {
   }
 
   async function handleSubmit() {
-    // Final server-side validation
-    if (driverAge < 21) {
-      toast.error("Driver must be at least 21 years old");
-      return;
-    }
-    if (!allTermsAccepted || !signatureData || !signerName) {
-      toast.error("Please accept all terms and provide your signature");
-      return;
-    }
-
     setSubmitting(true);
     try {
       const customerData = hireType === "business" ? { ...driver, ...business } : driver;
       const { id: customerId } = await createCustomer({ data: customerData as any });
 
-      const terms = TERMS_CLAUSES.filter((t) => acceptedTerms[t.key]).map((t) => ({
+      const terms = applicableTerms.filter((t) => acceptedTerms[t.key]).map((t) => ({
         clause_key: t.key,
         clause_label: t.label,
       }));
@@ -254,23 +228,24 @@ function RentalAgreementPage() {
           amount_due_pickup: rental.amount_due_pickup,
           payment_method: rental.payment_method,
           payment_notes: rental.payment_notes,
-          // Fixed excess values
           insurance_age_category: driverAge >= 21 && driverAge < 25 ? "under_25" : driverAge >= 25 && driverAge <= 70 ? "25_to_70" : "over_70",
           standard_excess: 1500,
           custom_excess: 2000,
           total_loss_excess: 3500,
-          terms_accepted: true,
+          terms_accepted: Object.values(acceptedTerms).some(Boolean),
           terms,
         },
       });
 
-      await saveSignature({
-        data: {
-          agreement_id: id,
-          signer_name: signerName,
-          signature_data: signatureData,
-        },
-      });
+      if (signatureData || signerName) {
+        await saveSignature({
+          data: {
+            agreement_id: id,
+            signer_name: signerName || "Unsigned",
+            signature_data: signatureData || "",
+          },
+        });
+      }
 
       setAgreementId(id);
       setAgreementNo(agreement_no);
@@ -516,11 +491,6 @@ function RentalAgreementPage() {
                     {driverAge > 0 ? (
                       <>
                         <span className="font-bold text-foreground">{driverAge}</span> years old
-                        {!isEligibleAge && (
-                          <span className="ml-2 flex items-center gap-1 text-destructive">
-                            <AlertCircle className="h-4 w-4" /> Must be 21+
-                          </span>
-                        )}
                       </>
                     ) : (
                       <span className="text-muted-foreground">Enter DOB above</span>
@@ -546,17 +516,6 @@ function RentalAgreementPage() {
                   </div>
                 </div>
               </div>
-              {!isEligibleAge && driverAge > 0 && (
-                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-5 w-5 mt-0.5" />
-                    <div>
-                      <p className="font-semibold">You must be at least 21 years old to rent a vehicle.</p>
-                      <p className="mt-1">Current age: {driverAge} years. Minimum required: 21 years.</p>
-                    </div>
-                  </div>
-                </div>
-              )}
               <div className="rounded-md border border-border bg-secondary/50 p-4 text-sm text-muted-foreground">
                 <p className="font-semibold text-foreground">Insurance Conditions</p>
                 <ul className="mt-2 space-y-1">
@@ -574,8 +533,10 @@ function RentalAgreementPage() {
             <div className="space-y-6">
               <h2 className="text-xl font-bold">Terms & Conditions</h2>
               <p className="text-sm text-muted-foreground">Review the terms below.</p>
+
               <div className="space-y-3">
-                {TERMS_CLAUSES.map((term) => (
+                <h3 className="text-sm font-semibold text-muted-foreground">General Terms</h3>
+                {GENERAL_TERMS.map((term) => (
                   <label key={term.key} className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
                     <input
                       type="checkbox"
@@ -587,8 +548,45 @@ function RentalAgreementPage() {
                   </label>
                 ))}
               </div>
+
+              {selectedVehicle?.vehicle_type === "truck" && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground">Truck Rental Conditions</h3>
+                  {TRUCK_RENTAL_TERMS.map((term) => (
+                    <label key={term.key} className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms[term.key] || false}
+                        onChange={(e) => setAcceptedTerms({ ...acceptedTerms, [term.key]: e.target.checked })}
+                        className="mt-0.5"
+                      />
+                      <span className="text-sm">{term.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {(selectedVehicle?.vehicle_type === "car" ||
+                selectedVehicle?.vehicle_type === "suv" ||
+                selectedVehicle?.vehicle_type === "van") && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground">Car Rental Conditions</h3>
+                  {CAR_RENTAL_TERMS.map((term) => (
+                    <label key={term.key} className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms[term.key] || false}
+                        onChange={(e) => setAcceptedTerms({ ...acceptedTerms, [term.key]: e.target.checked })}
+                        className="mt-0.5"
+                      />
+                      <span className="text-sm">{term.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
               <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
-                <span className="font-semibold">{Object.values(acceptedTerms).filter(Boolean).length}</span> of {TERMS_CLAUSES.length} terms accepted
+                <span className="font-semibold">{applicableTerms.filter((t) => acceptedTerms[t.key]).length}</span> of {applicableTerms.length} terms accepted
               </div>
             </div>
           )}
@@ -641,7 +639,7 @@ function RentalAgreementPage() {
                 </ReviewSection>
 
                 <ReviewSection title="Terms Accepted">
-                  <p>{Object.values(acceptedTerms).filter(Boolean).length} of {TERMS_CLAUSES.length} terms accepted</p>
+                  <p>{applicableTerms.filter((t) => acceptedTerms[t.key]).length} of {applicableTerms.length} terms accepted</p>
                 </ReviewSection>
               </div>
             </div>
@@ -740,8 +738,7 @@ function RentalAgreementPage() {
             ) : (
               <button
                 onClick={nextStep}
-                disabled={false}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
               >
                 Next <ChevronRight className="h-4 w-4" />
               </button>
@@ -758,26 +755,21 @@ function Input({
   value,
   onChange,
   type = "text",
-  required,
   className = "",
 }: {
   label: string;
   value: string | number;
   onChange: (v: string) => void;
   type?: string;
-  required?: boolean;
   className?: string;
 }) {
   return (
     <div className={className}>
-      <label className="text-sm font-medium">
-        {label} {required && <span className="text-destructive">*</span>}
-      </label>
+      <label className="text-sm font-medium">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        required={required}
         className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
       />
     </div>
@@ -789,23 +781,18 @@ function Select({
   value,
   onChange,
   options,
-  required,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
-  required?: boolean;
 }) {
   return (
     <div>
-      <label className="text-sm font-medium">
-        {label} {required && <span className="text-destructive">*</span>}
-      </label>
+      <label className="text-sm font-medium">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        required={required}
         className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
       >
         {options.map((opt) => (
