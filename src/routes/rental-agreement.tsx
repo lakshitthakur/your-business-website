@@ -35,35 +35,44 @@ const STEPS = [
   { id: "confirmation", label: "Confirmation" },
 ];
 
-/** General T&C shown to every renter (exact wording). */
+/** General T&C — shown to every renter (exact wording from Important Terms & Checklist). */
 const GENERAL_TERMS = [
-  { key: "interstate", label: "Interstate travel is permitted with prior approval. Vehicle must be returned to VIC." },
-  { key: "return_notice", label: "Minimum 7 days notice required for early return. Early return fees may apply." },
-  { key: "smoking", label: "No smoking, vaping, or pets allowed in the vehicle. Cleaning fees apply for violations." },
-  { key: "bond_refund", label: "Bond will be refunded within 14 days of vehicle return, subject to inspection and outstanding charges." },
-  { key: "servicing", label: "All servicing is included and arranged by Punjab Rentals. Customer must make vehicle available." },
-  { key: "mechanical_faults", label: "Report any mechanical faults immediately. Do not attempt repairs without authorization." },
-  { key: "late_payments", label: "Late payments may incur additional fees. Persistent late payment may result in termination." },
-  { key: "lost_keys", label: "Lost keys replacement fee: $350. Customer is responsible for all keys provided." },
-  { key: "toll_parking", label: "Toll, parking, and speeding fines are the customer's responsibility. Administration fees apply." },
-  { key: "tyre_damage", label: "Tyre damage beyond normal wear is the customer's responsibility." },
-  { key: "insurance_excess", label: "Insurance excess applies in the event of an accident or claim. See insurance section for amounts." },
-  { key: "accidents", label: "All accidents, hit-and-runs, and damage must be reported to police and Punjab Rentals within 24 hours." },
-  { key: "late_charges", label: "Late return charges apply at 1.5x the daily rate. Unauthorized use beyond rental period may result in recovery." },
-  { key: "roadside", label: "24/7 roadside assistance is included. Contact Punjab Rentals before arranging any assistance." },
-  { key: "cleaning", label: "Vehicle must be returned in clean condition. Excessive cleaning fees may apply." },
-  { key: "fuel", label: "Vehicle must be returned with the same fuel level as pickup. Refueling charges apply." },
-  { key: "missing_equipment", label: "Customer is responsible for all equipment provided (spare tyre, jack, tools). Replacement fees apply." },
+  { key: "interstate", label: "Interstate travel is not permitted. The vehicle is only insured and allowed to be driven within Victoria." },
+  { key: "return_notice", label: "2 weeks advance notice must be provided before returning the vehicle to avoid losing your bond, unless a different arrangement has been mutually agreed upon." },
+  { key: "smoking", label: "Smoking, vaping, or allowing pets inside the vehicle is strictly prohibited, $200 - Steam Cleaning Fee will be charged for any breach." },
+  { key: "bond_refund", label: "Bond is refunded within 48 business hours of the vehicle being returned and inspected." },
+  { key: "servicing", label: "The renter is responsible for taking the rental vehicle to the owner's designated mechanic for scheduled servicing and inspections in a prompt manner, with failure to do so making them liable for any resulting damage or issues, often requiring them to cover costs and potentially voiding insurance, as per the rental agreement." },
+  { key: "mechanical_faults", label: "If Renter notice any mechanical issue, they must immediately contact us, not a random mechanic, and we will direct you to one of our approved repairers; failing to do so could make you responsible for extra cost." },
+  { key: "late_payments", label: "Your Rental agreement is considered to be in breach if a payment is delayed by two days." },
+  { key: "lost_keys", label: "Replacement for Lost keys can cost between $600 - $1500 depending upon the make and model of the vehicle." },
+  { key: "toll_fee", label: "$7 administration fee per nomination is charged to Renter for every Toll nomination." },
+  { key: "infringement_fee", label: "$35 administration fee per nomination is charged to Renter for every Parking, Speeding Or Any Infringement nomination." },
+  { key: "tyre_damage", label: "Tyre Punctures OR faults/Damages to vehicles caused by driver fault must be fixed by the Renter before handover at their own cost." },
+  {
+    key: "insurance_excess",
+    label:
+      "The renter/business must pay insurance excess within 24 hrs of the accident before the insurer covers the claim. Some Senarios where access is payable are as follows:\n1. If you or your pre-nominated driver is at Fault\n2. If you are Involved in a Hit and Run incident but don't have full information to make an insurance claim\n3. Accidents involving animals (especially wildlife), your own property, or situations where no other person/entity is at fault\n4. Disputed Accident - No party accepts fault, it may go to court, where a magistrate decides\n5. Any incident where Insurance deems that the Excess is payable.",
+  },
 ];
 
-/** Car rental T&C (exact wording) — shown with general terms for car/suv/van. */
+/** Terms applicable to Car Rental Only (exact wording). */
 const CAR_RENTAL_TERMS = [
-  { key: "car_conditions", label: "Car-specific: No off-road use. No towing without approval. No rideshare without commercial insurance." },
+  { key: "car_late_charge", label: "Late charge is calculated at $40 per day inc GST." },
+  { key: "car_roadside", label: "Roadside Assistance is NOT included in this agreement as standard. Roadside Assistance can be added for an additional cost." },
+  { key: "car_scratches", label: "Minor surface scratches repair cost is $300/each. Major damages are to be fixed as per Insurance guidelines or by mutually agreed amount." },
+  { key: "car_fees", label: "Vacuum fee - $50, Washing fee - $50, Fuel top up - $3.98 per litre, Steam Cleaning - $200, Stain removal - $70/each, Missing tyre - $350, Missing jack - $150, Missing floor mats - $100." },
 ];
 
-/** Truck rental T&C (exact wording) — shown with general terms for truck. */
+/** Terms applicable to Truck Rental Only (exact wording). */
 const TRUCK_RENTAL_TERMS = [
-  { key: "truck_conditions", label: "Truck-specific: Do not exceed GVM. Load must be properly secured. Driver must hold appropriate licence." },
+  { key: "truck_underbody", label: "Damgage to Under body and above Cab is not covered by Insurance and Renter will be liable to pay the Repair/Replacement. Example: If you a rock or metal underneath the body or hit a bridge or tree, insurance doesn't cover these damages." },
+  { key: "truck_dpf", label: "Failure to follow Diesel Particulate Diffuser procedure will result in Out of pocket repair cost between $2000 - $7000 plus Towing Charges." },
+  { key: "truck_roadside_included", label: "Standard Roadside Assistance within 60 kms of Melbourne CBD is included for free." },
+  { key: "truck_roadside_outside", label: "Renter may have to pay out of pocket charges for Roadside Assistance and Towing service when you are outside 60 kms from Melbourne CBD." },
+  { key: "truck_late_charge", label: "Late charge is calculated at $100 per day inc GST." },
+  { key: "truck_nominated_driver", label: "Only the nominated driver is covered by insurance. For business hire, all drivers must be nominated prior to using the rented vehicle for them to covered in insurance." },
+  { key: "truck_fees", label: "Vacuum fee - $50, Washing fee - $150, Fuel top up - $3.98 per litre, Steam Cleaning - $200, Stain removal - $70/each, Missing tyre - $650, Missing jack - $650, Missing floor mats - $400." },
+  { key: "truck_scratches", label: "Minor surface scratches repair cost is $500/each. Major damages are fixed as per Insurance guidelines." },
 ];
 
 function getApplicableTerms(vehicleType?: string | null) {
@@ -531,11 +540,12 @@ function RentalAgreementPage() {
 
           {step === 4 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold">Terms & Conditions</h2>
-              <p className="text-sm text-muted-foreground">Review the terms below.</p>
+              <h2 className="text-xl font-bold">IMPORTANT TERMS & CHECKLIST</h2>
+              <p className="text-sm text-muted-foreground">
+                Please read the terms and tick each box. Should you need any clarification, please ask one of our staff members.
+              </p>
 
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground">General Terms</h3>
                 {GENERAL_TERMS.map((term) => (
                   <label key={term.key} className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
                     <input
@@ -544,33 +554,16 @@ function RentalAgreementPage() {
                       onChange={(e) => setAcceptedTerms({ ...acceptedTerms, [term.key]: e.target.checked })}
                       className="mt-0.5"
                     />
-                    <span className="text-sm">{term.label}</span>
+                    <span className="text-sm whitespace-pre-line">{term.label}</span>
                   </label>
                 ))}
               </div>
-
-              {selectedVehicle?.vehicle_type === "truck" && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Truck Rental Conditions</h3>
-                  {TRUCK_RENTAL_TERMS.map((term) => (
-                    <label key={term.key} className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
-                      <input
-                        type="checkbox"
-                        checked={acceptedTerms[term.key] || false}
-                        onChange={(e) => setAcceptedTerms({ ...acceptedTerms, [term.key]: e.target.checked })}
-                        className="mt-0.5"
-                      />
-                      <span className="text-sm">{term.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
 
               {(selectedVehicle?.vehicle_type === "car" ||
                 selectedVehicle?.vehicle_type === "suv" ||
                 selectedVehicle?.vehicle_type === "van") && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Car Rental Conditions</h3>
+                  <h3 className="rounded-md bg-secondary px-3 py-2 text-sm font-semibold">Terms applicable to Car Rental Only</h3>
                   {CAR_RENTAL_TERMS.map((term) => (
                     <label key={term.key} className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
                       <input
@@ -579,7 +572,24 @@ function RentalAgreementPage() {
                         onChange={(e) => setAcceptedTerms({ ...acceptedTerms, [term.key]: e.target.checked })}
                         className="mt-0.5"
                       />
-                      <span className="text-sm">{term.label}</span>
+                      <span className="text-sm whitespace-pre-line">{term.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {selectedVehicle?.vehicle_type === "truck" && (
+                <div className="space-y-3">
+                  <h3 className="rounded-md bg-secondary px-3 py-2 text-sm font-semibold">Terms applicable to Truck Rental Only</h3>
+                  {TRUCK_RENTAL_TERMS.map((term) => (
+                    <label key={term.key} className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms[term.key] || false}
+                        onChange={(e) => setAcceptedTerms({ ...acceptedTerms, [term.key]: e.target.checked })}
+                        className="mt-0.5"
+                      />
+                      <span className="text-sm whitespace-pre-line">{term.label}</span>
                     </label>
                   ))}
                 </div>
