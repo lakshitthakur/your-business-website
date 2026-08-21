@@ -660,7 +660,6 @@ function RentalAgreementPage() {
                   onChange={(e) => setSignerName(e.target.value)}
                   placeholder="Enter your full legal name"
                   className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  required
                 />
               </div>
 
@@ -750,7 +749,7 @@ function RentalAgreementPage() {
             {step === STEPS.length - 2 ? (
               <button
                 onClick={handleSubmit}
-                disabled={submitting || !allTermsAccepted || !signatureData || !signerName}
+                disabled={submitting}
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
               >
                 {submitting ? "Submitting..." : "Accept & Sign"}
