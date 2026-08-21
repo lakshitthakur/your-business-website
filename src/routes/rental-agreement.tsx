@@ -57,7 +57,8 @@ const TERMS_CLAUSES = [
   { key: "truck_conditions", label: "Truck-specific: Do not exceed GVM. Load must be properly secured. Driver must hold appropriate licence." },
 ];
 
-function RentalAgreementPage({ search }: { search: { vehicleId: string } }) {
+function RentalAgreementPage() {
+  const search = Route.useSearch();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [hireType, setHireType] = useState<"individual" | "business">("individual");
