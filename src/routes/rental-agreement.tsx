@@ -146,37 +146,18 @@ function RentalAgreementPage() {
 
   // Validation for each step
   function validateStep0(): string | null {
-    if (hireType === "business") {
-      if (!business.entity_name.trim()) return "Entity name is required";
-      if (!business.authorised_person.trim()) return "Authorised person is required";
-      if (!business.entity_email.trim()) return "Email is required";
-      if (!business.entity_phone.trim()) return "Phone is required";
-    }
     return null;
   }
 
   function validateStep1(): string | null {
-    if (!driver.first_name.trim()) return "First name is required";
-    if (!driver.last_name.trim()) return "Last name is required";
-    if (!driver.phone.trim()) return "Phone is required";
-    if (!driver.licence_number.trim()) return "Licence number is required";
-    if (!driver.licence_expiry) return "Licence expiry is required";
-    if (!driver.licence_state.trim()) return "Licence state is required";
-    if (!driver.emergency_contact_name.trim()) return "Emergency contact name is required";
-    if (!driver.emergency_contact_phone.trim()) return "Emergency contact phone is required";
     return null;
   }
 
   function validateStep2(): string | null {
-    if (!rental.rental_start) return "Rental start date is required";
-    if (!rental.rental_end) return "Rental end date is required";
-    if (rental.rental_amount <= 0) return "Rental amount is required";
     return null;
   }
 
   function validateStep3(): string | null {
-    if (!insurance.dob) return "Date of birth is required";
-    if (driverAge < 21) return "Driver must be at least 21 years old";
     return null;
   }
 
@@ -186,7 +167,6 @@ function RentalAgreementPage() {
       case 1: return validateStep1();
       case 2: return validateStep2();
       case 3: return validateStep3();
-      case 4: return allTermsAccepted ? null : "All terms must be accepted";
       default: return null;
     }
   }
@@ -392,12 +372,12 @@ function RentalAgreementPage() {
                 <>
                   <h3 className="text-lg font-bold">Business / Entity Details</h3>
                   <div className="grid gap-4 md:grid-cols-2">
-                    <Input label="Entity Name" value={business.entity_name} onChange={(v) => setBusiness({ ...business, entity_name: v })} required />
+                    <Input label="Entity Name" value={business.entity_name} onChange={(v) => setBusiness({ ...business, entity_name: v })} />
                     <Input label="ABN/ACN" value={business.entity_abn} onChange={(v) => setBusiness({ ...business, entity_abn: v })} />
-                    <Input label="Authorised Person" value={business.authorised_person} onChange={(v) => setBusiness({ ...business, authorised_person: v })} required />
+                    <Input label="Authorised Person" value={business.authorised_person} onChange={(v) => setBusiness({ ...business, authorised_person: v })} />
                     <Input label="Position" value={business.authorised_position} onChange={(v) => setBusiness({ ...business, authorised_position: v })} />
-                    <Input label="Email" type="email" value={business.entity_email} onChange={(v) => setBusiness({ ...business, entity_email: v })} required />
-                    <Input label="Phone" value={business.entity_phone} onChange={(v) => setBusiness({ ...business, entity_phone: v })} required />
+                    <Input label="Email" type="email" value={business.entity_email} onChange={(v) => setBusiness({ ...business, entity_email: v })} />
+                    <Input label="Phone" value={business.entity_phone} onChange={(v) => setBusiness({ ...business, entity_phone: v })} />
                     <Input label="Entity Address" value={business.entity_address} onChange={(v) => setBusiness({ ...business, entity_address: v })} className="md:col-span-2" />
                     <Input label="Licence Number" value={business.entity_licence_number} onChange={(v) => setBusiness({ ...business, entity_licence_number: v })} />
                     <Input label="Licence Expiry" type="date" value={business.entity_licence_expiry} onChange={(v) => setBusiness({ ...business, entity_licence_expiry: v })} />
@@ -418,14 +398,14 @@ function RentalAgreementPage() {
             <div className="space-y-6">
               <h2 className="text-xl font-bold">Driver Details</h2>
               <div className="grid gap-4 md:grid-cols-2">
-                <Input label="First Name" value={driver.first_name} onChange={(v) => setDriver({ ...driver, first_name: v })} required />
-                <Input label="Last Name" value={driver.last_name} onChange={(v) => setDriver({ ...driver, last_name: v })} required />
+                <Input label="First Name" value={driver.first_name} onChange={(v) => setDriver({ ...driver, first_name: v })} />
+                <Input label="Last Name" value={driver.last_name} onChange={(v) => setDriver({ ...driver, last_name: v })} />
                 <Input label="Email" type="email" value={driver.email} onChange={(v) => setDriver({ ...driver, email: v })} />
-                <Input label="Phone" value={driver.phone} onChange={(v) => setDriver({ ...driver, phone: v })} required />
+                <Input label="Phone" value={driver.phone} onChange={(v) => setDriver({ ...driver, phone: v })} />
                 <Input label="Date of Birth" type="date" value={driver.dob} onChange={(v) => setDriver({ ...driver, dob: v })} />
-                <Input label="Licence Number" value={driver.licence_number} onChange={(v) => setDriver({ ...driver, licence_number: v })} required />
-                <Input label="Licence Expiry" type="date" value={driver.licence_expiry} onChange={(v) => setDriver({ ...driver, licence_expiry: v })} required />
-                <Input label="Issuing State" value={driver.licence_state} onChange={(v) => setDriver({ ...driver, licence_state: v })} required />
+                <Input label="Licence Number" value={driver.licence_number} onChange={(v) => setDriver({ ...driver, licence_number: v })} />
+                <Input label="Licence Expiry" type="date" value={driver.licence_expiry} onChange={(v) => setDriver({ ...driver, licence_expiry: v })} />
+                <Input label="Issuing State" value={driver.licence_state} onChange={(v) => setDriver({ ...driver, licence_state: v })} />
                 <Input label="Country" value={driver.licence_country} onChange={(v) => setDriver({ ...driver, licence_country: v })} />
                 <Input label="Residential Address" value={driver.residential_address} onChange={(v) => setDriver({ ...driver, residential_address: v })} className="md:col-span-2" />
                 <Input label="Suburb" value={driver.suburb} onChange={(v) => setDriver({ ...driver, suburb: v })} />
@@ -436,9 +416,9 @@ function RentalAgreementPage() {
 
               <h3 className="text-lg font-bold">Emergency Contact</h3>
               <div className="grid gap-4 md:grid-cols-2">
-                <Input label="Name" value={driver.emergency_contact_name} onChange={(v) => setDriver({ ...driver, emergency_contact_name: v })} required />
+                <Input label="Name" value={driver.emergency_contact_name} onChange={(v) => setDriver({ ...driver, emergency_contact_name: v })} />
                 <Input label="Relationship" value={driver.emergency_contact_relationship} onChange={(v) => setDriver({ ...driver, emergency_contact_relationship: v })} />
-                <Input label="Phone" value={driver.emergency_contact_phone} onChange={(v) => setDriver({ ...driver, emergency_contact_phone: v })} required />
+                <Input label="Phone" value={driver.emergency_contact_phone} onChange={(v) => setDriver({ ...driver, emergency_contact_phone: v })} />
               </div>
             </div>
           )}
@@ -478,9 +458,9 @@ function RentalAgreementPage() {
                 </div>
               )}
               <div className="grid gap-4 md:grid-cols-2">
-                <Input label="Rental Start Date" type="date" value={rental.rental_start} onChange={(v) => setRental({ ...rental, rental_start: v })} required />
-                <Input label="Rental End Date" type="date" value={rental.rental_end} onChange={(v) => setRental({ ...rental, rental_end: v })} required />
-                <Input label="Rental Amount ($)" type="number" value={rental.rental_amount} onChange={(v) => setRental({ ...rental, rental_amount: Number(v) })} required />
+                <Input label="Rental Start Date" type="date" value={rental.rental_start} onChange={(v) => setRental({ ...rental, rental_start: v })} />
+                <Input label="Rental End Date" type="date" value={rental.rental_end} onChange={(v) => setRental({ ...rental, rental_end: v })} />
+                <Input label="Rental Amount ($)" type="number" value={rental.rental_amount} onChange={(v) => setRental({ ...rental, rental_amount: Number(v) })} />
                 <Select
                   label="Rental Cycle"
                   value={rental.rental_cycle}
@@ -522,13 +502,12 @@ function RentalAgreementPage() {
               <h2 className="text-xl font-bold">Insurance</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium">Date of Birth <span className="text-destructive">*</span></label>
+                  <label className="text-sm font-medium">Date of Birth</label>
                   <input
                     type="date"
                     value={insurance.dob}
                     onChange={(e) => setInsurance({ ...insurance, dob: e.target.value })}
                     className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    required
                   />
                 </div>
                 <div>
@@ -551,19 +530,19 @@ function RentalAgreementPage() {
                 <div>
                   <label className="text-sm font-medium">Standard Excess</label>
                   <div className="mt-1 rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm font-semibold">
-                    $1,500 <span className="text-xs font-normal text-muted-foreground">(read-only)</span>
+                    $1,500
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Write-off Excess</label>
                   <div className="mt-1 rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm font-semibold">
-                    $2,000 <span className="text-xs font-normal text-muted-foreground">(read-only)</span>
+                    $2,000
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Standard + Write-off Excess</label>
                   <div className="mt-1 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-bold">
-                    $3,500 <span className="text-xs font-normal text-muted-foreground">(read-only)</span>
+                    $3,500
                   </div>
                 </div>
               </div>
